@@ -53,7 +53,7 @@ for simulation_idx = 1 : args.num_simulations
 		end
 
 		% finally actually sample sexist remarks
-		coin_flips = rand(1,conversation_size);
+		coin_flips = rand(1,conversation_size)*100;
 		sexist_remarks = coin_flips <= percent_sexist_remarks_per_person(people_indices);
 
 		% finally add sexist remark if "allowed"
