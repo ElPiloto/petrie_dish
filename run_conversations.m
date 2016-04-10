@@ -8,6 +8,8 @@ global FEMALE;
 rng(args.rng_seed);
 male_sexist_counts_across_sims = [];
 female_sexist_counts_across_sims = [];
+starting_sexist_probabilities_across_sims = [];
+ending_sexist_probabilities_across_sims = [];
 
 for simulation_idx = 1 : args.num_simulations
 
@@ -28,6 +30,8 @@ for simulation_idx = 1 : args.num_simulations
 			1, true, args.prob_percent_sexist_remarks_by_gender{person});
 	end
 
+	% let's store their starting sexist tendencies
+	starting_sexist_probabilities_across_sims = [starting_sexist_probabilities_across_sims; percent_sexist_remarks_per_person'];
 
 	for conversation_idx = 1 : args.num_conversations
 		% sample conversation size
@@ -63,9 +67,15 @@ for simulation_idx = 1 : args.num_simulations
 				if gender == FEMALE 
 					sexist_remarks_encountered_per_person(male_indices) = ...
 					  sexist_remarks_encountered_per_person(male_indices)  + 1;
+					% here we increase the likelihood that women will say more sexist things if they witnessed sexism
+					percent_sexist_remarks_per_person(female_indices) = ...
+						min(percent_sexist_remarks_per_person(female_indices) + args.increase_in_sexism_after_witnessing, 100);
 				elseif gender == MALE 
 					sexist_remarks_encountered_per_person(female_indices) = ... 
-					  sexist_remarks_encountered_per_person(female_indices)  + 1;
+					  sexist_remarks_encountered_per_person(female_indices) + 1;
+					% here we increase the likelihood that men will say more sexist things if they witnessed sexism
+					percent_sexist_remarks_per_person(male_indices) = ...
+						min(percent_sexist_remarks_per_person(male_indices) + args.increase_in_sexism_after_witnessing, 100);
 				end
 			end
 		end
@@ -78,6 +88,8 @@ for simulation_idx = 1 : args.num_simulations
 	% add stats 
 	male_sexist_counts_across_sims = [male_sexist_counts_across_sims; sexist_remarks_encountered_per_person(find(people == MALE))];
 	female_sexist_counts_across_sims = [female_sexist_counts_across_sims; sexist_remarks_encountered_per_person(find(people == FEMALE))];
+	% see what their sexist probabilities ended up as
+	ending_sexist_probabilities_across_sims = [ending_sexist_probabilities_across_sims; percent_sexist_remarks_per_person'];
 end
 
 figure(1);
@@ -90,4 +102,17 @@ subplot(2,1,2);
 hist(male_sexist_counts_across_sims);
 xlabel('Num sexist encounters faced');
 title(sprintf('Males facing sexism over %d simulations', args.num_simulations));
+% we only want to show the increase in sexism_percentages if they're actually
+% changing, duuuuuuuh
+if args.increase_in_sexism_after_witnessing > 0
+	figure(2);
+	subplot(2,1,1);
+	hist(starting_sexist_probabilities_across_sims);
+	xlabel('Percent of sexist remarks');
+	title('Start of simulation');
+	subplot(2,1,2);
+	hist(ending_sexist_probabilities_across_sims);
+	xlabel('Percent of sexist remarks');
+	title('End of simulation');
+end
 

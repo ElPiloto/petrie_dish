@@ -22,4 +22,4 @@ args.prob_percent_sexist_remarks_by_gender = {[50 10 10 10 10 10], [50 10 10 10 
 args.conversation_sizes = [2 3 4 5 6 7 8];
 args.prob_conversation_sizes = [30 20 10 10 10 10 10];
 
-
+args.increase_in_sexism_after_witnessing = 1;
